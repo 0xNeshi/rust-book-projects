@@ -1,16 +1,16 @@
-pub fn median(list: &mut Vec<u8>) -> u8 {
+pub fn median(list: &mut [u8]) -> u8 {
     assert!(!list.is_empty(), "The list cannot be empty");
     quickselect(list, 0, list.len() - 1, list.len() / 2)
 }
 
 /// A selection algorithm that finds the k-th smallest element in an unordered list
 /// See https://en.wikipedia.org/wiki/Quickselect
-fn quickselect(list: &mut Vec<u8>, left: usize, right: usize, k: usize) -> u8 {
+fn quickselect(list: &mut [u8], left: usize, right: usize, k: usize) -> u8 {
     if left == right {
         return list[left];
     }
 
-    let pivot_index = partition(list, left, right, k);
+    let pivot_index = partition(list, left, right);
 
     if k == pivot_index {
         list[k]
@@ -21,24 +21,17 @@ fn quickselect(list: &mut Vec<u8>, left: usize, right: usize, k: usize) -> u8 {
     }
 }
 
-fn partition(list: &mut Vec<u8>, left: usize, right: usize, pivot_index: usize) -> usize {
-    let pivot = list[pivot_index];
-    swap(list, pivot_index, right);
+fn partition(list: &mut [u8], left: usize, right: usize) -> usize {
+    let pivot = list[right];
     let mut store_index = left;
     for i in left..right {
         if list[i] < pivot {
-            swap(list, store_index, i);
+            list.swap(store_index, i);
             store_index += 1;
         }
     }
-    swap(list, right, store_index);
+    list.swap(right, store_index);
     store_index
-}
-
-fn swap(list: &mut Vec<u8>, left: usize, right: usize) {
-    let temp = list[left];
-    list[left] = list[right];
-    list[right] = temp;
 }
 
 #[cfg(test)]
