@@ -1,6 +1,8 @@
 pub fn median(list: &mut [u8]) -> u8 {
     assert!(!list.is_empty(), "The list cannot be empty");
     quickselect(list, 0, list.len() - 1, list.len() / 2)
+    // ALTERNATIVE SOLUTION: just use `select_nth_unstable`
+    // *list.select_nth_unstable(list.len() / 2).1
 }
 
 /// A selection algorithm that finds the k-th smallest element in an unordered list
