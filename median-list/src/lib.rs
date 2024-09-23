@@ -43,31 +43,31 @@ mod tests {
     #[test]
     #[should_panic]
     fn empty_list_can_have_no_median() {
-        median(&mut vec![]);
+        median(&mut []);
     }
 
     #[test]
     fn single_element_is_the_median() {
-        assert_eq!(1, median(&mut vec![1]));
+        assert_eq!(1, median(&mut [1]));
     }
 
     #[test]
     fn two_elements_the_second_is_median() {
-        assert_eq!(2, median(&mut vec![1, 2]));
+        assert_eq!(2, median(&mut [1, 2]));
     }
 
     #[test]
     fn three_elements() {
-        assert_eq!(2, median(&mut vec![1, 2, 3]));
+        assert_eq!(2, median(&mut [1, 2, 3]));
     }
 
     #[test]
     fn four_elements() {
-        assert_eq!(3, median(&mut vec![4, 1, 2, 3]));
+        assert_eq!(3, median(&mut [4, 1, 2, 3]));
     }
 
     #[test]
     fn long_list() {
-        assert_eq!(5, median(&mut vec![1, 6, 9, 10, 0, 3, 4, 5, 8, 7, 2]));
+        assert_eq!(5, median(&mut [1, 6, 9, 10, 0, 3, 4, 5, 8, 7, 2]));
     }
 }
