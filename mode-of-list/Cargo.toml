@@ -1,0 +1,6 @@
+[package]
+name = "mode-of-list"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
