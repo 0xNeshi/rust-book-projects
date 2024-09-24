@@ -1,47 +1,50 @@
 const CONSONANTS: &str = "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ";
-const VOWELS: &str = "aeiouAEIOU";
 
-pub fn to_pig_latin(input: &str) -> String {
-    let mut result: Vec<String> = vec![];
-
-    for word in input.split_whitespace() {
-        let mut chars = word.chars();
-        if let Some(first) = chars.next() {
-            let mut word = word;
-            let mut punctuation: Option<char> = None;
-            if let Some(last) = chars.next_back() {
-                if last.is_ascii_punctuation() {
-                    word = &word[..word.len() - 1];
-                    punctuation = Some(last);
-                }
-            }
-            if VOWELS.contains(first) {
-                let mut value = format!("{word}hay");
-                if let Some(punctuation) = punctuation {
-                    value.push(punctuation);
-                }
-                result.push(value);
-            } else {
-                let capitalized = is_capitalized(word);
-                let suffix: String = word
-                    .chars()
-                    .take_while(|ch| CONSONANTS.contains(*ch))
-                    .map(|ch| ch.to_lowercase().next().unwrap())
-                    .collect();
-                let mut prefix = word[suffix.len()..].to_string();
-                if capitalized {
-                    prefix = capitalize_first(&prefix);
-                }
-                let mut value = format!("{prefix}{suffix}ay");
-                if let Some(punctuation) = punctuation {
-                    value.push(punctuation);
-                }
-                result.push(value);
+fn word_to_pig_latin(word: &str) -> String {
+    let mut chars = word.chars();
+    if let Some(first) = chars.next() {
+        let mut word = word;
+        let mut punctuation: Option<char> = None;
+        if let Some(last) = chars.next_back() {
+            if last.is_ascii_punctuation() {
+                word = &word[..word.len() - 1];
+                punctuation = Some(last);
             }
         }
+        if CONSONANTS.contains(first) {
+            let capitalized = is_capitalized(word);
+            let suffix: String = word
+                .chars()
+                .take_while(|ch| CONSONANTS.contains(*ch))
+                .map(|ch| ch.to_lowercase().next().unwrap())
+                .collect();
+            let mut prefix = word[suffix.len()..].to_string();
+            if capitalized {
+                prefix = capitalize_first(&prefix);
+            }
+            let mut value = format!("{prefix}{suffix}ay");
+            if let Some(punctuation) = punctuation {
+                value.push(punctuation);
+            }
+            return value;
+        } else {
+            let mut value = format!("{word}hay");
+            if let Some(punctuation) = punctuation {
+                value.push(punctuation);
+            }
+            return value;
+        }
+    } else {
+        word.to_string()
     }
+}
 
-    result.join(" ")
+pub fn to_pig_latin(input: &str) -> String {
+    input
+        .split_whitespace()
+        .map(|word| word_to_pig_latin(word))
+        .collect::<Vec<String>>()
+        .join(" ")
 }
 
 fn is_capitalized(s: &str) -> bool {
