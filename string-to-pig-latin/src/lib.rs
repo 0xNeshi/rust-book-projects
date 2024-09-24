@@ -9,7 +9,7 @@ fn is_consonant(c: char) -> bool {
 fn capitalize_first(s: &str) -> String {
     let mut chars = s.chars();
     if let Some(first_char) = chars.next() {
-        first_char.to_uppercase().collect::<String>() + chars.as_str().to_lowercase().as_str()
+        first_char.to_uppercase().collect::<String>() + &chars.as_str().to_lowercase()
     } else {
         String::new()
     }
@@ -17,10 +17,7 @@ fn capitalize_first(s: &str) -> String {
 
 // Function to check if the word was capitalized
 fn was_capitalized(word: &str) -> bool {
-    word.chars()
-        .next()
-        .map(|c| c.is_uppercase())
-        .unwrap_or(false)
+    word.chars().next().map_or(false, |c| c.is_uppercase())
 }
 
 // Function to convert a single word to Pig Latin, handling consonant clusters, capitalization, and punctuation
@@ -34,20 +31,13 @@ fn word_to_pig_latin(word: &str) -> String {
         let capitalized = was_capitalized(prefix);
 
         // Collect leading consonants
-        let mut consonant_prefix = String::new();
-        for c in prefix.chars().take_while(|ch| is_consonant(*ch)) {
-            consonant_prefix.push(c);
-        }
-
-        // Build the remainder of the word after the consonant prefix
+        let consonant_prefix: String = prefix.chars().take_while(|&ch| is_consonant(ch)).collect();
         let remainder: String = prefix.chars().skip(consonant_prefix.len()).collect();
 
         let pig_latin_word = if consonant_prefix.is_empty() {
-            // If the word starts with a vowel, just add "hay"
-            format!("{}hay", prefix)
+            format!("{}hay", prefix) // Starts with a vowel
         } else {
-            // Otherwise, move the consonant prefix to the end and add "ay"
-            format!("{}{}ay", remainder, consonant_prefix)
+            format!("{}{}ay", remainder, consonant_prefix) // Consonant cluster at start
         };
 
         // Reapply capitalization if the original word was capitalized
@@ -68,8 +58,8 @@ fn word_to_pig_latin(word: &str) -> String {
 pub fn to_pig_latin(sentence: &str) -> String {
     sentence
         .split_whitespace()
-        .map(|word| word_to_pig_latin(word))
-        .collect::<Vec<String>>()
+        .map(word_to_pig_latin)
+        .collect::<Vec<_>>()
         .join(" ")
 }
 
