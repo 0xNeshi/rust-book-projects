@@ -1,64 +1,76 @@
-const CONSONANTS: &str = "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ";
+use regex::Regex;
 
+fn is_consonant(c: char) -> bool {
+    let consonant_regex = Regex::new(r"(?i)[bcdfghjklmnpqrstvwxyz]").unwrap();
+    consonant_regex.is_match(&c.to_string())
+}
+
+// Function to capitalize the first letter of a word and lowercase the rest
+fn capitalize_first(s: &str) -> String {
+    let mut chars = s.chars();
+    if let Some(first_char) = chars.next() {
+        first_char.to_uppercase().collect::<String>() + chars.as_str().to_lowercase().as_str()
+    } else {
+        String::new()
+    }
+}
+
+// Function to check if the word was capitalized
+fn was_capitalized(word: &str) -> bool {
+    word.chars()
+        .next()
+        .map(|c| c.is_uppercase())
+        .unwrap_or(false)
+}
+
+// Function to convert a single word to Pig Latin, handling consonant clusters, capitalization, and punctuation
 fn word_to_pig_latin(word: &str) -> String {
-    let mut chars = word.chars();
-    if let Some(first) = chars.next() {
-        let mut word = word;
-        let mut punctuation: Option<char> = None;
-        if let Some(last) = chars.next_back() {
-            if last.is_ascii_punctuation() {
-                word = &word[..word.len() - 1];
-                punctuation = Some(last);
-            }
+    let re = Regex::new(r"([a-zA-Z']+)([.,!?;]*)").unwrap(); // Regex to split word and handle apostrophes
+    if let Some(captures) = re.captures(word) {
+        let prefix = captures.get(1).unwrap().as_str(); // Full word
+        let punctuation = captures.get(2).unwrap().as_str(); // Any punctuation
+
+        // Preserve capitalization information
+        let capitalized = was_capitalized(prefix);
+
+        // Collect leading consonants
+        let mut consonant_prefix = String::new();
+        for c in prefix.chars().take_while(|ch| is_consonant(*ch)) {
+            consonant_prefix.push(c);
         }
-        if CONSONANTS.contains(first) {
-            let capitalized = is_capitalized(word);
-            let suffix: String = word
-                .chars()
-                .take_while(|ch| CONSONANTS.contains(*ch))
-                .map(|ch| ch.to_lowercase().next().unwrap())
-                .collect();
-            let mut prefix = word[suffix.len()..].to_string();
-            if capitalized {
-                prefix = capitalize_first(&prefix);
-            }
-            let mut value = format!("{prefix}{suffix}ay");
-            if let Some(punctuation) = punctuation {
-                value.push(punctuation);
-            }
-            return value;
+
+        // Build the remainder of the word after the consonant prefix
+        let remainder: String = prefix.chars().skip(consonant_prefix.len()).collect();
+
+        let pig_latin_word = if consonant_prefix.is_empty() {
+            // If the word starts with a vowel, just add "hay"
+            format!("{}hay", prefix)
         } else {
-            let mut value = format!("{word}hay");
-            if let Some(punctuation) = punctuation {
-                value.push(punctuation);
-            }
-            return value;
-        }
+            // Otherwise, move the consonant prefix to the end and add "ay"
+            format!("{}{}ay", remainder, consonant_prefix)
+        };
+
+        // Reapply capitalization if the original word was capitalized
+        let final_word = if capitalized {
+            capitalize_first(&pig_latin_word)
+        } else {
+            pig_latin_word
+        };
+
+        // Return the Pig Latin word with punctuation added back
+        format!("{}{}", final_word, punctuation)
     } else {
         word.to_string()
     }
 }
 
-pub fn to_pig_latin(input: &str) -> String {
-    input
+// Public function to convert a sentence to Pig Latin
+pub fn to_pig_latin(sentence: &str) -> String {
+    sentence
         .split_whitespace()
         .map(|word| word_to_pig_latin(word))
         .collect::<Vec<String>>()
         .join(" ")
-}
-
-fn is_capitalized(s: &str) -> bool {
-    s.chars().next().unwrap().is_uppercase()
-}
-
-fn capitalize_first(s: &str) -> String {
-    let mut chars = s.chars();
-    let first_char = chars.next().map(|c| c.to_uppercase().collect::<String>());
-    let rest: String = chars.collect();
-    match first_char {
-        Some(first) => format!("{}{}", first, rest),
-        None => String::new(),
-    }
 }
 
 #[cfg(test)]
